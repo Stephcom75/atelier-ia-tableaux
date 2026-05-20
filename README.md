@@ -1,31 +1,19 @@
-# Atelier IA de Tableaux — V3 Vercel sécurisée
+# Atelier IA de Tableaux — V3.1 Vercel sécurisée
 
 Application React/Vite qui génère des tableaux IA avec Pollinations.ai et le modèle `zimage`.
 
-## Ce qui change en V3
+## Correction V3.1
 
-Cette version ne demande plus la clé API dans l'interface.
+La V3 générait bien l'image, mais l'URL renvoyée par Pollinations demandait encore une authentification.
+Résultat : la carte apparaissait dans la galerie, mais l'image ne s'affichait pas.
 
-Le frontend appelle :
+La V3.1 corrige cela :
 
-```text
-/api/generate
-```
-
-La fonction serveur Vercel appelle ensuite Pollinations avec la variable d'environnement :
-
-```text
-POLLINATIONS_API_KEY
-```
-
-Ainsi, la clé API n'est pas visible côté navigateur.
-
-## Liens
-
-- Repository : https://github.com/Stephcom75/atelier-ia-tableaux
-- Vercel : https://atelier-ia-tableaux.vercel.app
-- Pollinations : https://pollinations.ai
-- Compte API Pollinations : https://enter.pollinations.ai
+1. Le frontend appelle `/api/generate`
+2. La fonction serveur Vercel appelle Pollinations avec `POLLINATIONS_API_KEY`
+3. La fonction serveur récupère l'image avec l'autorisation serveur
+4. Elle renvoie au frontend une image intégrée en `data:image/...;base64`
+5. L'utilisateur ne voit jamais la clé API
 
 ## Variables d'environnement Vercel
 
@@ -45,32 +33,15 @@ Preview
 Development
 ```
 
-## Installation locale
-
-Pour tester localement :
-
-```bash
-npm install
-npm run dev
-```
-
-Attention : en local, la route `/api/generate` fonctionne surtout via Vercel.  
-Pour tester le backend localement, utilisez plutôt :
-
-```bash
-npx vercel dev
-```
-
 ## Déploiement
-
-Vercel est connecté au repository GitHub.  
-À chaque push sur la branche `main`, Vercel redéploie automatiquement.
 
 ```bash
 git add .
-git commit -m "V3 secure Vercel backend"
+git commit -m "Fix image display with server-side image proxy"
 git push
 ```
+
+Vercel redéploie automatiquement après le push.
 
 ## Crédit Pollinations
 
