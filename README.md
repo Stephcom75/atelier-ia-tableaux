@@ -1,60 +1,80 @@
-# Atelier IA de Tableaux
+# Atelier IA de Tableaux — V3 Vercel sécurisée
 
-Application React/Vite générant des tableaux IA avec Pollinations.ai et le modèle `zimage`.
+Application React/Vite qui génère des tableaux IA avec Pollinations.ai et le modèle `zimage`.
 
-## Liens du projet
+## Ce qui change en V3
 
-- Application GitHub Pages : https://Stephcom75.github.io/atelier-ia-tableaux/
-- Repository GitHub : https://github.com/Stephcom75/atelier-ia-tableaux
+Cette version ne demande plus la clé API dans l'interface.
+
+Le frontend appelle :
+
+```text
+/api/generate
+```
+
+La fonction serveur Vercel appelle ensuite Pollinations avec la variable d'environnement :
+
+```text
+POLLINATIONS_API_KEY
+```
+
+Ainsi, la clé API n'est pas visible côté navigateur.
+
+## Liens
+
+- Repository : https://github.com/Stephcom75/atelier-ia-tableaux
+- Vercel : https://atelier-ia-tableaux.vercel.app
 - Pollinations : https://pollinations.ai
-- Compte / API Pollinations : https://enter.pollinations.ai
+- Compte API Pollinations : https://enter.pollinations.ai
 
-## Crédit Pollinations
+## Variables d'environnement Vercel
 
-Cette application respecte les exigences de crédit :
+Dans Vercel :
 
-- Lien vers `pollinations.ai`
-- Badge visible : `Built with pollinations.ai`
-- App Author : `Stephcom75`
-- Utilisation de l’API Pollinations
-- Modèle image : `zimage`
+```text
+Project → Settings → Environment Variables
+Name  : POLLINATIONS_API_KEY
+Value : votre clé API Pollinations
+```
 
-## Sécurité API
+Appliquer à :
 
-Ne jamais publier une clé secrète `sk_` dans le code frontend.
-
-Pour cette version GitHub Pages, l’utilisateur entre sa clé `pk_` dans l’interface.  
-Elle est conservée seulement dans le navigateur via `localStorage`.
-
-Pour une app commerciale, il faudra créer une version backend proxy sécurisée.
+```text
+Production
+Preview
+Development
+```
 
 ## Installation locale
+
+Pour tester localement :
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Mise en ligne GitHub Pages
-
-Après avoir envoyé les fichiers sur GitHub :
-
-1. Va dans ton dépôt GitHub : https://github.com/Stephcom75/atelier-ia-tableaux
-2. Va dans `Settings`
-3. Va dans `Pages`
-4. Dans `Build and deployment`, choisis `GitHub Actions`
-5. Pousse le code sur la branche `main`
-6. Le site sera disponible ici : https://Stephcom75.github.io/atelier-ia-tableaux/
-
-## Commandes Git pour envoyer le projet
-
-Depuis le dossier du projet :
+Attention : en local, la route `/api/generate` fonctionne surtout via Vercel.  
+Pour tester le backend localement, utilisez plutôt :
 
 ```bash
-git init
-git add .
-git commit -m "Initial commit - Atelier IA de Tableaux"
-git branch -M main
-git remote add origin https://github.com/Stephcom75/atelier-ia-tableaux.git
-git push -u origin main
+npx vercel dev
 ```
+
+## Déploiement
+
+Vercel est connecté au repository GitHub.  
+À chaque push sur la branche `main`, Vercel redéploie automatiquement.
+
+```bash
+git add .
+git commit -m "V3 secure Vercel backend"
+git push
+```
+
+## Crédit Pollinations
+
+- Badge visible : `Built with pollinations.ai`
+- Lien vers `pollinations.ai`
+- Lien vers `enter.pollinations.ai`
+- App Author : `Stephcom75`

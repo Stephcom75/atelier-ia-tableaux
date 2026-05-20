@@ -6,7 +6,6 @@ import {
   ExternalLink,
   Image as ImageIcon,
   Loader2,
-  Lock,
   Palette,
   Sparkles,
   Wand2,
@@ -14,10 +13,9 @@ import {
 
 const APP_AUTHOR = import.meta.env.VITE_APP_AUTHOR || "Stephcom75";
 const REPOSITORY_URL = import.meta.env.VITE_REPOSITORY_URL || "https://github.com/Stephcom75/atelier-ia-tableaux";
-const APP_URL = import.meta.env.VITE_APP_URL || "https://Stephcom75.github.io/atelier-ia-tableaux/";
+const APP_URL = import.meta.env.VITE_APP_URL || "https://atelier-ia-tableaux.vercel.app";
 const POLLINATIONS_HOME = "https://pollinations.ai";
 const POLLINATIONS_REGISTER = "https://enter.pollinations.ai";
-const POLLINATIONS_API = "https://gen.pollinations.ai/v1/images/generations";
 
 const ARTISTS = [
   {
@@ -76,7 +74,6 @@ function HeaderBadge({ children }) {
 }
 
 export default function App() {
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem("pollinations_api_key") || "");
   const [subject, setSubject] = useState(EXAMPLES[0]);
   const [artistId, setArtistId] = useState("van-gogh");
   const [ratioId, setRatioId] = useState("square");
@@ -109,11 +106,6 @@ export default function App() {
     ].join(", ");
   }, [subject, artist, negativePrompt]);
 
-  function updateApiKey(value) {
-    setApiKey(value);
-    localStorage.setItem("pollinations_api_key", value);
-  }
-
   function saveGallery(items) {
     const cleanItems = items.slice(0, 24);
     setGallery(cleanItems);
@@ -123,18 +115,6 @@ export default function App() {
   async function generateImage() {
     setError("");
 
-    const cleanKey = apiKey.trim();
-
-    if (!cleanKey) {
-      setError("Ajoute ta clé API Pollinations. Pour GitHub Pages, utilise une clé frontend/publishable pk_.");
-      return;
-    }
-
-    if (cleanKey.startsWith("sk_")) {
-      setError("Ne mets pas une clé secrète sk_ dans une app frontend publique. Utilise une clé pk_ ou un backend sécurisé.");
-      return;
-    }
-
     if (!subject.trim()) {
       setError("Décris le tableau que tu veux générer.");
       return;
@@ -143,40 +123,32 @@ export default function App() {
     setLoading(true);
 
     try {
-      const response = await fetch(POLLINATIONS_API, {
+      const serverResponse = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${cleanKey}`,
         },
         body: JSON.stringify({
-          model: "zimage",
           prompt: finalPrompt,
           width: ratio.width,
           height: ratio.height,
-          size: `${ratio.width}x${ratio.height}`,
           quality,
-          n: 1,
-          response_format: "url",
-          safe: true,
         }),
       });
 
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || `Erreur API ${response.status}`);
+      const data = await serverResponse.json();
+
+      if (!serverResponse.ok) {
+        throw new Error(data?.details || data?.error || `Erreur serveur ${serverResponse.status}`);
       }
 
-      const data = await response.json();
-      const url = data?.data?.[0]?.url;
-
-      if (!url) {
-        throw new Error("L’API n’a pas renvoyé d’URL d’image.");
+      if (!data?.url) {
+        throw new Error("Le serveur n’a pas renvoyé d’image.");
       }
 
       const item = {
         id: crypto.randomUUID(),
-        url,
+        url: data.url,
         subject,
         artist: artist.label,
         size: `${ratio.width}×${ratio.height}`,
@@ -217,6 +189,7 @@ export default function App() {
                 Built with pollinations.ai
               </HeaderBadge>
               <HeaderBadge>App Author : {APP_AUTHOR}</HeaderBadge>
+              <HeaderBadge>Clé API protégée côté serveur</HeaderBadge>
             </div>
 
             <h1>Atelier IA de tableaux.</h1>
@@ -238,20 +211,12 @@ export default function App() {
           </div>
 
           <div className="panel">
-            <div className="field">
-              <label>
-                <Lock size={15} />
-                Clé API Pollinations
-              </label>
-              <input
-                value={apiKey}
-                onChange={(event) => updateApiKey(event.target.value)}
-                type="password"
-                placeholder="pk_... recommandé pour GitHub Pages"
-              />
-              <p className="hint">
-                Site prévu pour : <strong>{APP_URL}</strong>. Utilise une clé pk_ côté utilisateur. Ne publie jamais une clé sk_ dans le code.
-              </p>
+            <div className="secure-box">
+              <Sparkles size={18} />
+              <div>
+                <strong>Version V3 sécurisée</strong>
+                <span>Les utilisateurs n’ont plus besoin d’entrer de clé API. La clé reste dans Vercel.</span>
+              </div>
             </div>
 
             <div className="field">
